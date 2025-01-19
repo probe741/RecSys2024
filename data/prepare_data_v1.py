@@ -32,12 +32,15 @@ image_emb_path = "image_embeddings.parquet"
 contrast_emb_path = "contrastive_vector.parquet"
 MAX_SEQ_LEN = 50
 
+print(train_path)
+
 print("Preprocess news info...")
 train_news_file = os.path.join(train_path, "articles.parquet")
 train_news = pl.scan_parquet(train_news_file)
-test_news_file = os.path.join(test_path, "articles.parquet")
-test_news = pl.scan_parquet(test_news_file)
-news = pl.concat([train_news, test_news])
+# test_news_file = os.path.join(test_path, "articles.parquet")
+# test_news = pl.scan_parquet(test_news_file)
+# news = pl.concat([train_news, test_news])
+news = train_news
 news = news.unique(subset=['article_id'])
 news = news.fill_null("")
 
@@ -102,7 +105,7 @@ def join_data(data_path):
     history_df = history_df.collect()
     behavior_file = os.path.join(data_path, "behaviors.parquet")
     sample_df = pl.scan_parquet(behavior_file)
-    if "test/" in data_path:
+    if False:
         sample_df = (
             sample_df.rename({"article_ids_inview": "article_id"})
             .explode('article_id')
@@ -153,12 +156,12 @@ valid_df.write_csv(f"./{dataset_version}/valid.csv")
 del valid_df
 gc.collect()
 
-test_df = join_data(test_path)
-print(test_df.head())
-print("Test samples", test_df.shape)
-test_df.write_csv(f"./{dataset_version}/test.csv")
-del test_df
-gc.collect()
+# test_df = join_data(test_path)
+# print(test_df.head())
+# print("Test samples", test_df.shape)
+# test_df.write_csv(f"./{dataset_version}/test.csv")
+# del test_df
+# gc.collect()
 
 print("Preprocess pretrained embeddings...")
 image_emb_df = pl.read_parquet(image_emb_path)
